@@ -133,17 +133,21 @@ class MainActivity : AppCompatActivity() {
         return sb.toString()
     }
 
-    private fun openInGoogleMaps() {
+   private fun openInGoogleMaps() {
         val lat = extractedLat ?: return
         val lng = extractedLng ?: return
-        val uri = Uri.parse("geo:$lat,$lng?q=$lat,$lng")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        intent.setPackage("com.google.android.apps.maps")
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            startActivity(Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://www.google.com/maps?q=$lat,$lng")))
+
+        try {
+            val geoUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(Location)")
+            val geoIntent = Intent(Intent.ACTION_VIEW, geoUri)
+            startActivity(geoIntent)
+        } catch (e: Exception) {
+            try {
+                val webUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=$lat,$lng")
+                startActivity(Intent(Intent.ACTION_VIEW, webUri))
+            } catch (e2: Exception) {
+                Toast.makeText(this, "No maps app found: ${e2.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
